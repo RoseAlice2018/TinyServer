@@ -20,9 +20,12 @@
 #define MAX_EVENT_NUMBER 10000 //最大事件数
 #define TIMESLOT 5             //最小超时单位
 
+
+// 日志写模式定义
 #define SYNLOG  //同步写日志
 //#define ASYNLOG //异步写日志
 
+// LT ET模式
 //#define listenfdET //边缘触发非阻塞
 #define listenfdLT //水平触发阻塞
 
@@ -87,7 +90,7 @@ int main(int argc, char *argv[])
 {
 #ifdef ASYNLOG
     Log::get_instance()->init("ServerLog", 2000, 800000, 8); //异步日志模型
-#endif
+#endif 
 
 #ifdef SYNLOG
     Log::get_instance()->init("ServerLog", 2000, 800000, 0); //同步日志模型
@@ -115,6 +118,7 @@ int main(int argc, char *argv[])
     }
     catch (...)
     {
+        printf("fail to create thread pool\n");
         return 1;
     }
 
