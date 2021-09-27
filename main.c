@@ -15,6 +15,7 @@
 #include "./http/http_conn.h"
 #include "./log/log.h"
 #include "./CGImysql/sql_connection_pool.h"
+#include "./config.c"
 
 #define MAX_FD 65536           //最大文件描述符
 #define MAX_EVENT_NUMBER 10000 //最大事件数
@@ -28,6 +29,9 @@
 // LT ET模式
 //#define listenfdET //边缘触发非阻塞
 #define listenfdLT //水平触发阻塞
+
+extern LOG
+extern listenfdMod
 
 //这三个函数在http_conn.cpp中定义，改变链接属性
 extern int addfd(int epollfd, int fd, bool one_shot);
