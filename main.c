@@ -15,23 +15,22 @@
 #include "./http/http_conn.h"
 #include "./log/log.h"
 #include "./CGImysql/sql_connection_pool.h"
-#include "./config.c"
+#include "./config.cpp"
 
 #define MAX_FD 65536           //最大文件描述符
 #define MAX_EVENT_NUMBER 10000 //最大事件数
 #define TIMESLOT 5             //最小超时单位
 
 
-// 日志写模式定义
-#define SYNLOG  //同步写日志
-//#define ASYNLOG //异步写日志
 
-// LT ET模式
-//#define listenfdET //边缘触发非阻塞
-#define listenfdLT //水平触发阻塞
-
+//LOG 日志模式选择
 extern LOG
-extern listenfdMod
+//EpollModel epoll模式选择
+extern EpollModel
+//IP 地址
+extern IP_address
+//Port 端口号
+extern Port
 
 //这三个函数在http_conn.cpp中定义，改变链接属性
 extern int addfd(int epollfd, int fd, bool one_shot);
@@ -92,14 +91,15 @@ void show_error(int connfd, const char *info)
 
 int main(int argc, char *argv[])
 {
-#ifdef ASYNLOG
-    Log::get_instance()->init("ServerLog", 2000, 800000, 8); //异步日志模型
-#endif 
-
-#ifdef SYNLOG
-    Log::get_instance()->init("ServerLog", 2000, 800000, 0); //同步日志模型
-#endif
-
+    if(LOG == ASYNLOG)
+    {
+        Log::get_instance()->init("ServerLog", 2000, 800000, 8); //异步日志模型
+    }
+    else if(LOG == SYNLOG)
+    {
+        Log::get_instance()->init("ServerLog", 2000, 800000, 0); //同步日志模型
+    }
+    //输入参数获取IP地址和端口号
     if (argc <= 1)
     {
         printf("usage: %s ip_address port_number\n", basename(argv[0]));
@@ -125,13 +125,14 @@ int main(int argc, char *argv[])
         printf("fail to create thread pool\n");
         return 1;
     }
-
+    //创建http连接数组
     http_conn *users = new http_conn[MAX_FD];
     assert(users);
 
     //初始化数据库读取表
     users->initmysql_result(connPool);
 
+    //socket建立连接
     int listenfd = socket(PF_INET, SOCK_STREAM, 0);
     assert(listenfd >= 0);
 
